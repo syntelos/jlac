@@ -1,1 +1,2 @@
 Main-Class: org.sump.analyzer.Loader
+Class-Path: /usr/share/java/RXTXcomm.jar
