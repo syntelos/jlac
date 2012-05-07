@@ -1,12 +1,14 @@
 #!/bin/sh
 
-wd=$(dirname $0)
+set -x
+
+wd=$(dirname $(readlink -f $0))
 
 analyzer_jar=${wd}/analyzer.jar
 tty=/dev/ttyACM0
 nal=/usr/lib/jni
 
-if [ ! -f "${tty}" ]
+if [ ! -c "${tty}" ]
 then
  cat<<EOF>&2
 Error, device not found '${tty}'.
