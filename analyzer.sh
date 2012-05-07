@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+#set -x
 
 wd=$(dirname $(readlink -f $0))
 
@@ -22,7 +22,7 @@ EOF
  exit 1
 elif [ -f "${analyzer_jar}" ]
 then
- java -jar ${analyzer_jar} -Dgnu.io.rxtx.SerialPorts="${tty}" -Djava.library.path="${nal}" $*
+ java -Dgnu.io.rxtx.SerialPorts="${tty}" -Djava.library.path="${nal}" -jar ${analyzer_jar} $*
 
 else
  cat<<EOF>&2

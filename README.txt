@@ -25,7 +25,7 @@ For other platforms
 
     analyzer_jar=${HOME}/src/jlac/analyzer.jar
 
-    java -jar ${analyzer_jar} -Dgnu.io.rxtx.SerialPorts="/dev/ttyACM0" -Djava.library.path="/usr/lib/jni/" $*
+    java -Dgnu.io.rxtx.SerialPorts="/dev/ttyACM0" -Djava.library.path="/usr/lib/jni/" -jar ${analyzer_jar} $*
 
 License
 

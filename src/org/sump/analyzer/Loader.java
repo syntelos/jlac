@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2006 Michael Poppitz
+ *  Copyright (C) 2012 John Pritchard
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,93 +32,94 @@ import javax.swing.UIManager.LookAndFeelInfo;
  * <p>
  * See description for {@link Loader#main(String[])} for details on supported arguments.
  * 
- * @version 0.7
+ * @version 0.8
  * @author Michael "Mr. Sump" Poppitz
- *
+ * @author Benjamin Vedder
+ * @author John Pritchard
  */
 public class Loader {
 
-	/**
-	 * Constructs a new loader.
-	 */
-	public Loader() {
-	}
+    /**
+     * Constructs a new loader.
+     */
+    public Loader() {
+    }
 
-	/**
-	 * Starts up the logic analyzer client.
-	 * Project ("*.slp") and data ("*.sla") files can be supplied as arguments.
-	 * The files will then be loaded automatically. If a file cannot be read, the client will exit.
-	 * @param args arguments
-	 */
-	public static void main(String[] args) {
+    /**
+     * Starts up the logic analyzer client.
+     * Project ("*.slp") and data ("*.sla") files can be supplied as arguments.
+     * The files will then be loaded automatically. If a file cannot be read, the client will exit.
+     * @param args arguments
+     */
+    public static void main(String[] args) {
 
-		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (UnsupportedLookAndFeelException e) {
-			// handle exception
-		} catch (ClassNotFoundException e) {
-			// handle exception
-		} catch (InstantiationException e) {
-			// handle exception
-		} catch (IllegalAccessException e) {
-			// handle exception
-		}
+        try {
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (UnsupportedLookAndFeelException e) {
+            // handle exception
+        } catch (ClassNotFoundException e) {
+            // handle exception
+        } catch (InstantiationException e) {
+            // handle exception
+        } catch (IllegalAccessException e) {
+            // handle exception
+        }
 
 
-		MainWindow w = new MainWindow();
+        MainWindow w = new MainWindow();
 
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
 
-			// handle options (there aren't any yet)
-			if (arg.startsWith("-")) {
-				System.out.println();
-				System.out.println("Sumps Logic Analyzer Client");
-				System.out.println("Copyright (C) 2006 Michael Poppitz");
-				System.out.println("Copyright (C) 2012 John Pritchard");
-				System.out.println();
-				System.out.println("This software is released under the GNU GPL.");
-				System.out.println();
-				System.out.println("Usage: run [<project file>] [<data file>]");
-				System.out.println();
-				System.out.println("	<project file> is a saved project with file extension \".slp\"");
-				System.out.println("	<data file> is saved data with file extension \".sla\"");
-				System.out.println();
-				System.exit(0);
+            // handle options (there aren't any yet)
+            if (arg.startsWith("-")) {
+                System.out.println();
+                System.out.println("Sumps Logic Analyzer Client");
+                System.out.println("Copyright (C) 2006 Michael Poppitz");
+                System.out.println("Copyright (C) 2012 John Pritchard");
+                System.out.println();
+                System.out.println("This software is released under the GNU GPL.");
+                System.out.println();
+                System.out.println("Usage: run [<project file>] [<data file>]");
+                System.out.println();
+                System.out.println("	<project file> is a saved project with file extension \".slp\"");
+                System.out.println("	<data file> is saved data with file extension \".sla\"");
+                System.out.println();
+                System.exit(0);
 
-			// handle file arguments
-			} else {
-				try {
-					File f = new File(arg);
-					if (!f.isFile()) {
-						System.out.println("Error: File does not exist: " + arg);
-						System.exit(-1);
-					}
-					if (arg.toLowerCase().endsWith(".slp")) {
-						w.loadProject(f);
-					} else if (arg.toLowerCase().endsWith(".sla")) {
-						w.loadData(f);
-					} else {
-						System.out.println("Error: Unknown file type in argument: " + arg);
-						System.exit(-1);
-					}
-				} catch (Exception e) {
-					System.out.println("Error: Exception occured while reading file: " + e.getMessage());
-					System.exit(-1);
-				}
-			}
-		}
+                // handle file arguments
+            } else {
+                try {
+                    File f = new File(arg);
+                    if (!f.isFile()) {
+                        System.out.println("Error: File does not exist: " + arg);
+                        System.exit(-1);
+                    }
+                    if (arg.toLowerCase().endsWith(".slp")) {
+                        w.loadProject(f);
+                    } else if (arg.toLowerCase().endsWith(".sla")) {
+                        w.loadData(f);
+                    } else {
+                        System.out.println("Error: Unknown file type in argument: " + arg);
+                        System.exit(-1);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error: Exception occured while reading file: " + e.getMessage());
+                    System.exit(-1);
+                }
+            }
+        }
 		
-		try {
-			SwingUtilities.invokeAndWait(w);
-		} catch (Exception e) {
-			System.out.println("Error while invoking application: " + e.getMessage());
-			System.exit(-1);
-		}
-	}
+        try {
+            SwingUtilities.invokeAndWait(w);
+        } catch (Exception e) {
+            System.out.println("Error while invoking application: " + e.getMessage());
+            System.exit(-1);
+        }
+    }
 }
