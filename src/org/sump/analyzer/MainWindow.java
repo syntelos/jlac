@@ -71,61 +71,19 @@ import org.sump.util.ClassPath;
  * 
  * @version 0.8
  * @author Michael "Mr. Sump" Poppitz
- * @author jdp (modified from version 0.7)
+ * @author Benjamin Vedder
+ * @author John Pritchard
  */
-public final class MainWindow extends WindowAdapter implements Runnable, ActionListener, WindowListener, StatusChangeListener, DiagramCursorChangeListener, MouseWheelListener {
+public final class MainWindow
+    extends WindowAdapter
+    implements Runnable, 
+               ActionListener, 
+               WindowListener, 
+               StatusChangeListener, 
+               DiagramCursorChangeListener, 
+               MouseWheelListener
+{
 
-    /**
-     * Creates a JMenu containing items as specified.
-     * If an item name is empty, a separator will be added in its place.
-     * 
-     * @param name Menu name
-     * @param entries array of menu item names.
-     * @return created menu
-     */
-    private JMenu createMenu(String name, String[] entries) {
-        JMenu menu = new JMenu(name);
-        if(entries != null) {
-            for (int i = 0; i < entries.length; i++) {
-                if (!entries[i].equals("")) {
-                    JMenuItem item = new JMenuItem(entries[i]);
-                    item.addActionListener(this);
-                    menu.add(item);
-                } else {
-                    menu.add(new JSeparator());
-                }
-            }
-        }
-        return (menu);
-    }
-	
-    /**
-     * Creates tool icons and adds them the the given tool bar.
-     * 
-     * @param tools tool bar to add icons to
-     * @param files array of icon file names
-     * @param descriptions array of icon descriptions
-     */
-    private void createTools(JToolBar tools, String[] files, String[] descriptions) {
-		
-        for (int i = 0; i < files.length; i++) {
-            URL u = MainWindow.class.getResource("icons/" + files[i]);
-            JButton b = new JButton(new ImageIcon(u, descriptions[i]));
-            b.setToolTipText(descriptions[i]);
-            b.setMargin(new Insets(0,0,0,0));
-            b.addActionListener(this);
-            tools.add(b);
-        }
-    }
-
-    /**
-     * Enables or disables functions that can only operate when captured data has been added to the diagram.
-     * @param enable set <code>true</code> to enable these functions, <code>false</code> to disable them
-     */
-    private void enableDataDependingFunctions(boolean enable) {
-        diagramMenu.setEnabled(enable);
-        toolMenu.setEnabled(enable);
-    }
 	
     /**
      * Inner class defining a File Filter for SLA files.
@@ -160,16 +118,92 @@ public final class MainWindow extends WindowAdapter implements Runnable, ActionL
 
         public static final String FILE_EXTENSION = ".slp";
     }
+
 	
+    private static final String APP_NAME = "Logic Analyzer Client";
+
+
+    private JMenu toolMenu;
+    private JMenu diagramMenu;
+	
+    private JFileChooser fileChooser;
+    private JFileChooser projectChooser;
+    private DeviceController[] controllers;
+    private int currentController;
+    private Diagram diagram;
+    private JScrollPane diagramPane;
+    private final Project project;
+    private JLabel status;
+    private Tool[] tools;
+    private JCheckBoxMenuItem cursorsEnabledMenuItem;
+    private JComboBox currentDisplayPage;
+    private JLabel maxDisplayPage;
+	
+    private JFrame frame;
+
+    private final ClassPath classpath;
+
+
     /**
      * Default constructor.
      *
      */
     public MainWindow() {
         super();
-        project = new Project();
+        this.project = new Project();
+        this.classpath = new ClassPath();
     }
-	
+
+
+    /**
+     * Creates a JMenu containing items as specified.
+     * If an item name is empty, a separator will be added in its place.
+     * 
+     * @param name Menu name
+     * @param entries array of menu item names.
+     * @return created menu
+     */
+    private JMenu createMenu(String name, String[] entries) {
+        JMenu menu = new JMenu(name);
+        if(entries != null) {
+            for (int i = 0; i < entries.length; i++) {
+                if (!entries[i].equals("")) {
+                    JMenuItem item = new JMenuItem(entries[i]);
+                    item.addActionListener(this);
+                    menu.add(item);
+                } else {
+                    menu.add(new JSeparator());
+                }
+            }
+        }
+        return (menu);
+    }
+    /**
+     * Creates tool icons and adds them the the given tool bar.
+     * 
+     * @param tools tool bar to add icons to
+     * @param files array of icon file names
+     * @param descriptions array of icon descriptions
+     */
+    private void createTools(JToolBar tools, String[] files, String[] descriptions) {
+		
+        for (int i = 0; i < files.length; i++) {
+            URL u = MainWindow.class.getResource("icons/" + files[i]);
+            JButton b = new JButton(new ImageIcon(u, descriptions[i]));
+            b.setToolTipText(descriptions[i]);
+            b.setMargin(new Insets(0,0,0,0));
+            b.addActionListener(this);
+            tools.add(b);
+        }
+    }
+    /**
+     * Enables or disables functions that can only operate when captured data has been added to the diagram.
+     * @param enable set <code>true</code> to enable these functions, <code>false</code> to disable them
+     */
+    private void enableDataDependingFunctions(boolean enable) {
+        diagramMenu.setEnabled(enable);
+        toolMenu.setEnabled(enable);
+    }	
     /**
      * Creates the GUI.
      *
@@ -202,9 +236,7 @@ public final class MainWindow extends WindowAdapter implements Runnable, ActionL
 
 
         try {
-            ClassPath classpath = new ClassPath();
-
-            JarFile jf = new JarFile(classpath.analyzer_jar);
+            JarFile jf = new JarFile(this.classpath.analyzer_jar);
             Enumeration<JarEntry> je = jf.entries();
             while(je.hasMoreElements()) {
                 String devicename = je.nextElement().getName();
@@ -274,7 +306,7 @@ public final class MainWindow extends WindowAdapter implements Runnable, ActionL
         LinkedList<Tool> loadedTools = new LinkedList<Tool>();
 		
         try {
-            JarFile jf = new JarFile("analyzer.jar");
+            JarFile jf = new JarFile(this.classpath.analyzer_jar);
             Enumeration<JarEntry> je = jf.entries();
             while(je.hasMoreElements()) {
                 String toolname = je.nextElement().getName();
@@ -581,12 +613,14 @@ public final class MainWindow extends WindowAdapter implements Runnable, ActionL
                                               "Sump's Logic Analyzer Client\n"
                                               + "\n"
                                               + "Copyright 2006 Michael Poppitz\n"
+                                              + "Copyright 2012 John Pritchard\n"
+                                              + "\n"
                                               + "This software is released under the GNU GPL.\n"
                                               + "\n"
-                                              + "Version: cvs_03062010\n"
+                                              + "Version: 0.8\n"
                                               + "\n"
-                                              + "Modified 2010-08-17\n"
-                                              + "by Benjamin Vedder (vedder87@gmail.com)\n"
+                                              + "Modified 2012-05-07\n"
+                                              + "by John Pritchard (jdp@syntelos.org)\n"
                                               + "\n"
                                               + "For more information see:\n"
                                               + "http://www.sump.org/projects/analyzer/",
@@ -810,25 +844,4 @@ public final class MainWindow extends WindowAdapter implements Runnable, ActionL
     public void exit() {
         System.exit(0);
     }
-		
-    private JMenu toolMenu;
-    private JMenu diagramMenu;
-	
-    private JFileChooser fileChooser;
-    private JFileChooser projectChooser;
-    private DeviceController[] controllers;
-    private int currentController;
-    private Diagram diagram;
-    private JScrollPane diagramPane;
-    private Project project;
-    private JLabel status;
-    private Tool[] tools;
-    private JCheckBoxMenuItem cursorsEnabledMenuItem;
-    private JComboBox currentDisplayPage;
-    private JLabel maxDisplayPage;
-	
-    private JFrame frame;
-	
-    private static final String APP_NAME = "Logic Analyzer Client";
-
 }
