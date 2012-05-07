@@ -79,6 +79,8 @@ public class Loader {
 				System.out.println();
 				System.out.println("Sumps Logic Analyzer Client");
 				System.out.println("Copyright (C) 2006 Michael Poppitz");
+				System.out.println("Copyright (C) 2012 John Pritchard");
+				System.out.println();
 				System.out.println("This software is released under the GNU GPL.");
 				System.out.println();
 				System.out.println("Usage: run [<project file>] [<data file>]");
