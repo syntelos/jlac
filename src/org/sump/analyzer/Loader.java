@@ -40,15 +40,11 @@ import javax.swing.UIManager.LookAndFeelInfo;
 public class Loader {
 
     /**
-     * Constructs a new loader.
-     */
-    public Loader() {
-    }
-
-    /**
-     * Starts up the logic analyzer client.
-     * Project ("*.slp") and data ("*.sla") files can be supplied as arguments.
-     * The files will then be loaded automatically. If a file cannot be read, the client will exit.
+     * Starts up the logic analyzer client.  Project ("*.slp") and
+     * data ("*.sla") files can be supplied as arguments.  The files
+     * will then be loaded. If a file cannot be read, the client will
+     * exit.
+     * 
      * @param args arguments
      */
     public static void main(String[] args) {
@@ -73,53 +69,62 @@ public class Loader {
 
         MainWindow w = new MainWindow();
 
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
+        for (int argx = 0; argx < args.length; argx++) {
+            String arg = args[argx];
 
-            // handle options (there aren't any yet)
             if (arg.startsWith("-")) {
-                System.out.println();
-                System.out.println("Sumps Logic Analyzer Client");
-                System.out.println("Copyright (C) 2006 Michael Poppitz");
-                System.out.println("Copyright (C) 2012 John Pritchard");
-                System.out.println();
-                System.out.println("This software is released under the GNU GPL.");
-                System.out.println();
-                System.out.println("Usage: run [<project file>] [<data file>]");
-                System.out.println();
-                System.out.println("	<project file> is a saved project with file extension \".slp\"");
-                System.out.println("	<data file> is saved data with file extension \".sla\"");
-                System.out.println();
-                System.exit(0);
 
-                // handle file arguments
-            } else {
+                System.out.println("Usage: run [file.slp] [file.sla]");
+                System.exit(1);
+            }
+            else {
                 try {
-                    File f = new File(arg);
+                    final File f = new File(arg);
+
                     if (!f.isFile()) {
-                        System.out.println("Error: File does not exist: " + arg);
-                        System.exit(-1);
+
+                        System.out.printf("Error, file not found '%s'%n",arg);
+
+                        System.exit(1);
                     }
-                    if (arg.toLowerCase().endsWith(".slp")) {
-                        w.loadProject(f);
-                    } else if (arg.toLowerCase().endsWith(".sla")) {
-                        w.loadData(f);
-                    } else {
-                        System.out.println("Error: Unknown file type in argument: " + arg);
-                        System.exit(-1);
+                    else {
+                        final String fext = Fext(f);
+                        if (fext.equals("slp")) {
+
+                            w.loadProject(f);
+                        }
+                        else if (fext.equals("sla")) {
+
+                            w.loadData(f);
+                        }
+                        else {
+                            System.out.printf("Error, unrecognized file name extension '%s' in '%s'%n",fext,arg);
+                            System.exit(1);
+                        }
                     }
-                } catch (Exception e) {
-                    System.out.println("Error: Exception occured while reading file: " + e.getMessage());
-                    System.exit(-1);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(1);
                 }
             }
         }
 		
         try {
-            SwingUtilities.invokeAndWait(w);
-        } catch (Exception e) {
-            System.out.println("Error while invoking application: " + e.getMessage());
-            System.exit(-1);
+            SwingUtilities.invokeLater(w);
         }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    private final static String Fext(File f){
+        String name = f.getName();
+        int idx = name.lastIndexOf('.');
+        if (0 < idx)
+            return name.substring(idx+1).toLowerCase();
+        else
+            return "";
     }
 }

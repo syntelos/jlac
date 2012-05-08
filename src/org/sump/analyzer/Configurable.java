@@ -35,16 +35,16 @@ import org.sump.util.Properties;
  * @author Michael "Mr. Sump" Poppitz
  */
 public interface Configurable {
-	/**
-	 * Reads configuration from given properties.
-	 * UI element settings must be modified according to the properties found. 
-	 * @param properties properties to read configuration from
-	 */
-	public void readProperties(Properties properties);
-	/**
-	 * Writes configuration to given properties.
-	 * Properties must be set according to the UI element settings.
-	 * @param properties properties to write configuration to
-	 */
-	public void writeProperties(Properties properties);
+    /**
+     * Reads configuration from given properties.
+     * UI element settings must be modified according to the properties found. 
+     * @param properties properties to read configuration from
+     */
+    public void readProperties(Properties properties);
+    /**
+     * Writes configuration to given properties.
+     * Properties must be set according to the UI element settings.
+     * @param properties properties to write configuration to
+     */
+    public void writeProperties(Properties properties);
 }

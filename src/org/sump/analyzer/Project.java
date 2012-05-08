@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2006 Michael Poppitz
+ *  Copyright (C) 2012 John Pritchard
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,66 +36,64 @@ import org.sump.util.Properties;
  * It also provides methods for loading and storing these properties from and to project configuration files.
  * This allows to keep multiple sets of user settings across multiple instance lifecycles.
  * 
- * @version 0.7
+ * @version 0.8
  * @author Michael "Mr. Sump" Poppitz
+ * @author John Pritchard
  */
 public class Project extends Object {
-	/**
-	 * Constructs a new project with an empty set of properties and configurable objects.
-	 */
-	public Project() {
-		this.properties = new Properties();
-		this.configurableObjectList = new LinkedList<Configurable>();
-	}
-	
-	/**
-	 * Adds a configurable object to the project.
-	 * The given objects properties will be read and written whenever load and store operations take place.
-	 * @param configurable configurable object
-	 */
-	public void addConfigurable(Configurable configurable) {
-		this.configurableObjectList.add(configurable);
-	}
-	
-	/**
-	 * Gets all currently defined properties for this project.
-	 * @return project properties
-	 */
-	public Properties getProperties() {
-		Iterator<Configurable> i = configurableObjectList.iterator();
-		while(i.hasNext())
-			((Configurable)i.next()).writeProperties(properties);
-		return (properties);
-	}
-	
-	/**
-	 * Loads properties from the given file and notifies all registered configurable objects.
-	 * @param file file to read properties from
-	 * @throws IOException when IO operation failes
-	 */
-	public void load(File file) throws IOException {
-		InputStream stream = new FileInputStream(file);
-		properties.load(stream);
-		Iterator<Configurable> i = configurableObjectList.iterator();
-		while(i.hasNext())
-			((Configurable)i.next()).readProperties(properties);
-	}
 
-	/**
-	 * Stores properties fetched from all registered configurable objects in the given file.
-	 * @param file file to store properties in
-	 * @throws IOException when IO operation failes
-	 */
-	public void store(File file) throws IOException {
-		// creating new properties object will remove alien properties read from broken / old project files
-		properties = new Properties();
-		Iterator<Configurable> i = configurableObjectList.iterator();
-		while(i.hasNext())
-			((Configurable)i.next()).writeProperties(properties);
-		OutputStream stream = new FileOutputStream(file);
-		properties.store(stream, "Sumps Logic Analyzer Project File");
-	}
+    private final Configurable[] configurables;
+
+
+    public Project(Configurable[] configurables) {
+        super();
+        this.configurables = configurables;
+    }
 	
-	private Properties properties;
-	private List<Configurable> configurableObjectList;
+    /**
+     * Loads properties from the given file and notifies all registered configurable objects.
+     * @param file file to read properties from
+     * @throws IOException when IO operation failes
+     */
+    public void load(File file) throws IOException {
+        final Properties properties = new Properties();
+        {
+            final InputStream in = new FileInputStream(file);
+            try {
+                properties.load(in);
+            }
+            finally {
+                in.close();
+            }
+        }
+        for (Configurable c : this.configurables){
+
+            c.readProperties(properties);
+        }
+    }
+
+    /**
+     * Stores properties fetched from all registered configurable objects in the given file.
+     * @param file file to store properties in
+     * @throws IOException when IO operation failes
+     */
+    public void store(File file) throws IOException {
+        final Properties properties = new Properties();
+        {
+            for (Configurable c : this.configurables){
+
+                c.writeProperties(properties);
+            }
+        }
+        {
+            OutputStream out = new FileOutputStream(file);
+            try {
+                properties.store(out, "Sumps Logic Analyzer Project File");
+            }
+            finally {
+                out.close();
+            }
+        }
+    }
+
 }

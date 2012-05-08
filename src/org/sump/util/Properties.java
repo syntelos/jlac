@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2006 Michael Poppitz
+ *  Copyright (C) 2012 John Pritchard
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,22 +24,24 @@ import java.util.Enumeration;
 import java.util.TreeSet;
 
 /**
- * Essentially the same as <code>java.util.Properties</code> but will store the properties in alphabetical order.
- * Ordering is implemented using a simple hack. It may stop working in future versions of Java.
+ * Store properties in alphabetical order.
  *
- * @version 0.7
+ * @version 0.8
  * @author Michael "Mr. Sump" Poppitz
- *
+ * @author John Pritchard
  */
-public class Properties extends java.util.Properties {
-	private static final long serialVersionUID = 1L;
+public class Properties
+    extends java.util.Properties
+{
 
-	/**
-	 * Get keys in alphabetical order.
-	 * This method is used by <code>store()</code>.
-	 */
-	@SuppressWarnings("unchecked")
-	public synchronized Enumeration keys() {
-		return Collections.enumeration(new TreeSet(keySet()));
-	}
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Get keys in alphabetical order.
+     * This method is used by <code>store()</code>.
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized Enumeration keys() {
+        return Collections.enumeration(new TreeSet(keySet()));
+    }
 }
