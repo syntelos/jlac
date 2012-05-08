@@ -19,11 +19,14 @@
 package org.sump.util;
 
 import org.sump.analyzer.Configurable;
+import org.sump.analyzer.Diagram;
 import org.sump.analyzer.devices.DeviceController;
 import org.sump.analyzer.tools.Tool;
 
+import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -36,12 +39,13 @@ import java.util.jar.JarFile;
 /**
  * Scan class path for tools, devices, etc..
  */
-public class ClassPath 
+public final class ClassPath 
     extends Object
 {
     private final static Class DeviceControllerClass = DeviceController.class;
     private final static Class ToolClass = Tool.class;
     private final static Class ConfigurableClass = Configurable.class;
+
 
     private final DeviceController[] controllers;
     private final Tool[] tools;
@@ -71,27 +75,45 @@ public class ClassPath
 
                         String classname = entryname.substring(0, entryname.indexOf(".class")).replace('/', '.');
                         try {
-                            Class clas = Class.forName(classname);
+                            final Class clas = Class.forName(classname);
+                            final int type = clas.getModifiers();
 
-                            if (!clas.isInterface()){
-
+                            if ((!clas.isInterface()) && (!Modifier.isAbstract(type))){
+                                /*
+                                 * Instantiate each class at most once
+                                 */
                                 if (DeviceControllerClass.isAssignableFrom(clas)){
 
-                                    controllers.add( (DeviceController)clas.newInstance());
+                                    DeviceController controller = (DeviceController)clas.newInstance();
+
+                                    controllers.add(controller);
 
                                     System.err.printf("Loaded Controller %s%n",clas.getName());
+
+                                    if (controller instanceof Tool)
+                                        tools.add((Tool)controller);
+
+                                    if (controller instanceof Configurable)
+                                        configurables.add((Configurable)controller);
+
                                 }
+                                else if (ToolClass.isAssignableFrom(clas)){
 
-                                if (ToolClass.isAssignableFrom(clas)){
+                                    Tool tool = (Tool)clas.newInstance();
 
-                                    tools.add( (Tool)clas.newInstance());
+                                    tools.add(tool);
 
                                     System.err.printf("Loaded Tool %s%n",clas.getName());
-                                }
-                            
-                                if (ConfigurableClass.isAssignableFrom(clas)){
 
-                                    configurables.add( (Configurable)clas.newInstance());
+                                    if (tool instanceof Configurable)
+                                        configurables.add((Configurable)tool);
+
+                                }
+                                else if (ConfigurableClass.isAssignableFrom(clas)){
+
+                                    Configurable configurable = (Configurable)clas.newInstance();
+
+                                    configurables.add(configurable);
 
                                     System.err.printf("Loaded Configurable %s%n",clas.getName());
                                 }
@@ -116,13 +138,30 @@ public class ClassPath
     }
 
 
-    public final DeviceController[] controllers(){
+    public DeviceController[] controllers(){
         return this.controllers.clone();
     }
-    public final Tool[] tools(){
+    public Tool[] tools(){
         return this.tools.clone();
     }
-    public final Configurable[] configurables(){
+    public Configurable[] configurables(){
         return this.configurables.clone();
+    }
+    public Tool[] tools(Frame frame){
+
+        for (Tool tool: this.tools){
+
+            tool.init(frame);
+        }
+        return this.tools.clone();
+    }
+    public Diagram getDiagram(){
+
+        for (Configurable c: this.configurables){
+
+            if (c instanceof Diagram)
+                return (Diagram)c;
+        }
+        throw new Error();
     }
 }

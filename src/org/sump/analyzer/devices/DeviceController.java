@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2008 Frank Kunz
+ *  Copyright (C) 2012 John Pritchard
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,49 +27,57 @@ import org.sump.analyzer.CapturedData;
 import org.sump.analyzer.Configurable;
 
 /**
- * Interface for implementing device controllers. Each device controller must implement
- * at least this interface.
+ * Device controller interface
  * 
  * @author Frank Kunz
- *
+ * @author John Pritchard
  */
 public interface DeviceController extends Configurable {
-	/** dialog showing and waiting for user action */
-	public final static int IDLE = 0;
-	/** capture currently running */
-	public final static int RUNNING = 1;
-	/** capture / dialog aborted by user */
-	public final static int ABORTED = 2;
-	/** capture finished */
-	public final static int DONE = 3;
+    /** 
+     * Dialog showing and waiting for user action
+     */
+    public final static int IDLE = 0;
+    /**
+     * Capture currently running
+     */
+    public final static int RUNNING = 1;
+    /** 
+     * Capture / dialog aborted by user
+     */
+    public final static int ABORTED = 2;
+    /** 
+     * Capture finished
+     */
+    public final static int DONE = 3;
 
-	/**
-	 * read the captured device data
-	 * @param parent parent component that requests the data (null if none)
-	 * @return the captured data or null if no data available
-	 */
-	public CapturedData getDeviceData(Component parent);
-	/**
-	 * update the status of the device controller GUI input fields
-	 */
-	public void updateFields();
-	/**
-	 * shows the device controllers GUI
-	 * @param frame parent frame
-	 * @return dialog status
-	 * @throws Exception when the dialog can not be shown
-	 */
-	public int showCaptureDialog(JFrame frame) throws Exception;
-	/**
-	 * shows the device controllers GUI and starts the capture with the current settings
-	 * @param frame parent frame
-	 * @return dialog status
-	 * @throws Exception when the dialog can not be shown
-	 */
-	public int showCaptureProgress(JFrame frame) throws Exception;
-	/**
-	 * get the device controller identification string
-	 * @return name of the controller
-	 */
-	public String getControllerName();
+
+    /**
+     * read the captured device data
+     * @param parent parent component that requests the data (null if none)
+     * @return the captured data or null if no data available
+     */
+    public CapturedData getDeviceData(Component parent);
+    /**
+     * update the status of the device controller GUI input fields
+     */
+    public void updateFields();
+    /**
+     * shows the device controllers GUI
+     * @param frame parent frame
+     * @return dialog status
+     * @throws Exception when the dialog can not be shown
+     */
+    public int showCaptureDialog(JFrame frame) throws Exception;
+    /**
+     * shows the device controllers GUI and starts the capture with the current settings
+     * @param frame parent frame
+     * @return dialog status
+     * @throws Exception when the dialog can not be shown
+     */
+    public int showCaptureProgress(JFrame frame) throws Exception;
+    /**
+     * get the device controller identification string
+     * @return name of the controller
+     */
+    public String getControllerName();
 }

@@ -74,7 +74,7 @@ import org.sump.util.ClassPath;
  * @author John Pritchard
  */
 public final class MainWindow
-    extends WindowAdapter
+    extends JFrame
     implements Runnable, 
                ActionListener, 
                WindowListener, 
@@ -129,7 +129,7 @@ public final class MainWindow
     private JFileChooser projectChooser;
 
     private int currentController;
-    private Diagram diagram;
+
     private JScrollPane diagramPane;
 
     private JLabel status;
@@ -137,11 +137,11 @@ public final class MainWindow
     private JCheckBoxMenuItem cursorsEnabledMenuItem;
     private JComboBox currentDisplayPage;
     private JLabel maxDisplayPage;
-	
-    private JFrame frame;
+
 
     private final Project project;
     private final ClassPath classpath;
+    private final Diagram diagram;
     private final Tool[] tools;
     private final DeviceController[] controllers;
 
@@ -150,12 +150,18 @@ public final class MainWindow
      *
      */
     public MainWindow() {
-        super();
+        super(APP_NAME);
+
+        this.setIconImage((new ImageIcon("org/sump/analyzer/icons/la.png")).getImage());
+        this.addWindowListener(this);
 
         this.classpath = new ClassPath();
+        this.project = new Project(this.classpath);
         this.controllers = this.classpath.controllers();
-        this.tools = this.classpath.tools();
-        this.project = new Project(this.classpath.configurables());
+        this.tools = this.classpath.tools(this);
+
+        this.diagram = this.classpath.getDiagram();
+        this.diagram.addStatusChangeListener(this);
     }
 
 
@@ -190,27 +196,27 @@ public final class MainWindow
             switch (Label.For(label)){
             case Open:
 
-                if (fileChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
                     if (file.isFile()) {
                         loadData(file);
-                        frame.setTitle(APP_NAME + " - " + file.getName());
+                        this.setTitle(APP_NAME + " - " + file.getName());
                     }
                     cursorsEnabledMenuItem.setSelected(diagram.getCursorMode());
-                    Container contentPane = frame.getContentPane();
+                    Container contentPane = this.getContentPane();
                     diagram.zoomFit((contentPane.getSize().width * 95) / 100);
                     updatePageInfo();
                 }
                 return;			
             case SaveAs:
 
-                if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
                     if(!file.getName().endsWith(SLAFilter.FILE_EXTENSION)) {
                         file = new File(file.getAbsolutePath() + SLAFilter.FILE_EXTENSION);
                     }
                     boolean writefile = true;
-                    if(file.exists() && (JOptionPane.showConfirmDialog(frame,
+                    if(file.exists() && (JOptionPane.showConfirmDialog(this,
                                                                        "The file " + file.getName() + " already exists. Overwrite it?",
                                                                        "Overwrite File",
                                                                        JOptionPane.YES_NO_OPTION,
@@ -219,14 +225,14 @@ public final class MainWindow
                     }
                     if (writefile) {
                         diagram.getCapturedData().writeToFile(file);
-                        frame.setTitle(APP_NAME + " - " + file.getName());
+                        this.setTitle(APP_NAME + " - " + file.getName());
                     }
                 }
                 return;
 
             case OpenProject:
 
-                if (projectChooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                if (projectChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                     File file = projectChooser.getSelectedFile();
                     if (file.isFile())
                         loadProject(file);
@@ -235,13 +241,13 @@ public final class MainWindow
 		
             case SaveProjectAs:		
 
-                if (projectChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                if (projectChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                     File file = projectChooser.getSelectedFile();
                     if(!file.getName().endsWith(SLPFilter.FILE_EXTENSION)) {
                         file = new File(file.getAbsolutePath() + SLPFilter.FILE_EXTENSION);
                     }
                     boolean writefile = true;
-                    if(file.exists() && (JOptionPane.showConfirmDialog(frame,
+                    if(file.exists() && (JOptionPane.showConfirmDialog(this,
                                                                        "The file " + file.getName() + " already exists. Overwrite it?",
                                                                        "Overwrite File",
                                                                        JOptionPane.YES_NO_OPTION,
@@ -259,9 +265,9 @@ public final class MainWindow
 
                 if (currentController < 0)
                     return;
-                else if (controllers[currentController].showCaptureDialog(frame) == DeviceController.DONE) {
-                    diagram.setCapturedData(controllers[currentController].getDeviceData(frame));
-                    Container contentPane = frame.getContentPane();
+                else if (controllers[currentController].showCaptureDialog(this) == DeviceController.DONE) {
+                    diagram.setCapturedData(controllers[currentController].getDeviceData(this));
+                    Container contentPane = this.getContentPane();
                     //diagram.zoomFit((contentPane.getSize().width * 95) / 100);
                     diagram.zoomFit(diagramPane.getViewport().getViewRect().width);
                     cursorsEnabledMenuItem.setSelected(diagram.getCursorMode());
@@ -272,9 +278,9 @@ public final class MainWindow
 
                 if (currentController < 0)
                     return;
-                else if (controllers[currentController].showCaptureProgress(frame) == DeviceController.DONE) {
-                    diagram.setCapturedData(controllers[currentController].getDeviceData(frame));
-                    Container contentPane = frame.getContentPane();
+                else if (controllers[currentController].showCaptureProgress(this) == DeviceController.DONE) {
+                    diagram.setCapturedData(controllers[currentController].getDeviceData(this));
+                    Container contentPane = this.getContentPane();
                     //diagram.zoomFit((contentPane.getSize().width * 95) / 100);
                     diagram.zoomFit(diagramPane.getViewport().getViewRect().width);
                     cursorsEnabledMenuItem.setSelected(diagram.getCursorMode());
@@ -336,7 +342,7 @@ public final class MainWindow
                 return;
 
             case ZoomFit:
-                Container contentPane = frame.getContentPane();
+                Container contentPane = this.getContentPane();
                 //diagram.zoomFit((contentPane.getSize().width * 95) / 100);
                 diagram.zoomFit(diagramPane.getViewport().getViewRect().width);
                 updatePageInfo();
@@ -363,11 +369,11 @@ public final class MainWindow
                 return;
 
             case DiagramSettings:
-                diagram.showSettingsDialog(frame);
+                diagram.showSettingsDialog(this);
                 return;
 				
             case Labels:
-                diagram.showLabelsDialog(frame);
+                diagram.showLabelsDialog(this);
                 return;
 
             case Cursors:
@@ -584,15 +590,22 @@ public final class MainWindow
     public void statusChanged(String s) {
         status.setText(s);
     }
-	
-    /**
-     * Handles window close requests.
-     */
-    public void windowClosing(WindowEvent event) {
+    public void windowOpened(WindowEvent evt){
+    }
+    public void windowClosing(WindowEvent evt) {
 
         System.exit(0);
     }
-
+    public void windowClosed(WindowEvent evt){
+    }
+    public void windowIconified(WindowEvent evt){
+    }
+    public void windowDeiconified(WindowEvent evt){
+    }
+    public void windowActivated(WindowEvent evt){
+    }
+    public void windowDeactivated(WindowEvent evt){
+    }
     /**
      * Load the given file as data.
      * @param file file to be loaded as data
@@ -619,9 +632,7 @@ public final class MainWindow
      */
     public void run() {
 
-        frame = new JFrame(APP_NAME);
-        frame.setIconImage((new ImageIcon("org/sump/analyzer/icons/la.png")).getImage());
-        Container contentPane = frame.getContentPane();
+        Container contentPane = this.getContentPane();
         contentPane.setLayout(new BorderLayout());
 
         JMenuBar mb = new JMenuBar();
@@ -687,7 +698,7 @@ public final class MainWindow
          */
         Label[] toolEntries = new Label[tools.length];
         for (int i = 0; i < tools.length; i++) {
-            tools[i].init(frame);
+
             toolEntries[i] = Label.For(tools[i].getName());
         }
         toolMenu = createMenu("Tools", toolEntries);
@@ -702,7 +713,7 @@ public final class MainWindow
         mb.add(helpMenu);
 
 		
-        frame.setJMenuBar(mb);
+        this.setJMenuBar(mb);
 		
         JToolBar tools = new JToolBar();
         tools.setRollover(true);
@@ -741,23 +752,18 @@ public final class MainWindow
         status = new JLabel(" ");
         contentPane.add(status, BorderLayout.SOUTH);
 		
-        diagram = new Diagram();
-        diagram.addStatusChangeListener(this);
+
         diagram.setPreferredSize(contentPane.getSize());
-        diagramPane = new JScrollPane(diagram);
-        //		JScrollBar srb = diagramPane.getHorizontalScrollBar();
-        //		srb.setUnitIncrement(10);
-        //		srb.setBlockIncrement(30);
+        diagramPane = new JScrollPane(this.diagram);
         diagramPane.setWheelScrollingEnabled(false);
 		
         contentPane.add(diagramPane, BorderLayout.CENTER);
 
         enableDataDependingFunctions(false);
 
-        frame.setSize(1000, 700);
-        frame.addWindowListener(this);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        this.setSize(1000, 700);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
 
         fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter((FileFilter) new SLAFilter());

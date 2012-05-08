@@ -25,10 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
+import org.sump.util.ClassPath;
 import org.sump.util.Properties;
 
 /**
@@ -45,9 +43,9 @@ public class Project extends Object {
     private final Configurable[] configurables;
 
 
-    public Project(Configurable[] configurables) {
+    public Project(ClassPath classpath) {
         super();
-        this.configurables = configurables;
+        this.configurables = classpath.configurables();
     }
 	
     /**

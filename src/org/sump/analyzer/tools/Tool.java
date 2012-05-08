@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2006 Michael Poppitz
+ *  Copyright (C) 2012 John Pritchard
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,39 +31,40 @@ import org.sump.analyzer.CapturedData;
  * 
  * @version 0.6
  * @author Michael "Mr. Sump" Poppitz
+ * @author John Pritchard
  */
 public interface Tool {
 
-	/**
-	 * Is called to get the name for the menu entry.
-	 * The name must be unique among all tools. Should end in "..." if it opens a dialog window.
-	 * @return name for this tool
-	 */
-	public String getName();
+    /**
+     * Is called to get the name for the menu entry.
+     * The name must be unique among all tools. Should end in "..." if it opens a dialog window.
+     * @return name for this tool
+     */
+    public String getName();
 
-	/**
-	 * Performs tool initialization.
-	 * This method should also prepare the dialog, if one is needed
-	 * @param frame main window's frame (needed for modal dialogs)
-	 */
-	public void init(Frame frame);
+    /**
+     * Performs tool initialization.
+     * This method should also prepare the dialog, if one is needed
+     * @param frame main window's frame (needed for modal dialogs)
+     */
+    public void init(Frame frame);
 	
-	/**
-	 * This method is invoked when the tool is selected from the Tools menu.
-	 * It should request any missing information using a dialog and perform the tool's actual task.
-	 * @param data currently displayed captured data
-	 * @return new <code>CapturedData</code> if provided data has been altered or <code>null</code> otherwise
-	 */
-	public CapturedData process(CapturedData data);
+    /**
+     * This method is invoked when the tool is selected from the Tools menu.
+     * It should request any missing information using a dialog and perform the tool's actual task.
+     * @param data currently displayed captured data
+     * @return new <code>CapturedData</code> if provided data has been altered or <code>null</code> otherwise
+     */
+    public CapturedData process(CapturedData data);
 
-	/**
-	 * This method is invoked when the tool is selected from the context menu after right clicking someplace in the diagram.
-	 * It should request any missing information using a dialog and perform the tool's actual task.
-	 * @param data currently displayed captured data
-	 * @param group channel group at the mouse position where the menu was openend
-	 * @param channel number of channel at the mouse position where the menu was openend
-	 * @param position number of sample at the mouse position where the menu was openend
-	 * @return new <code>CapturedData</code> if provided data has been altered or <code>null</code> otherwise
-	 */
-	public CapturedData process(CapturedData data, int group, int channel, int position);
+    /**
+     * This method is invoked when the tool is selected from the context menu after right clicking someplace in the diagram.
+     * It should request any missing information using a dialog and perform the tool's actual task.
+     * @param data currently displayed captured data
+     * @param group channel group at the mouse position where the menu was openend
+     * @param channel number of channel at the mouse position where the menu was openend
+     * @param position number of sample at the mouse position where the menu was openend
+     * @return new <code>CapturedData</code> if provided data has been altered or <code>null</code> otherwise
+     */
+    public CapturedData process(CapturedData data, int group, int channel, int position);
 }
