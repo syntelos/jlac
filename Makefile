@@ -13,7 +13,7 @@ SOURCES = $(wildcard src/org/sump/analyzer/*.java) $(wildcard src/org/sump/analy
 
 OBJECTS := $(SOURCES:.java=.class)
 
-JFLAGS = -cp $(CLASS_PATH)
+JFLAGS = -cp $(CLASS_PATH) -g
 
 $(TARGET_JAR): $(SOURCES) src/$(MANIFEST_MF)
 	javac $(JFLAGS) $(SOURCES)

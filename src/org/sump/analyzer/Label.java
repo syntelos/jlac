@@ -71,7 +71,7 @@ public enum Label {
     }
     public final static String For(ActionEvent evt){
         String label = evt.getActionCommand();
-        if (null == Label.For(label)){
+        if (Label.UNKNOWN == Label.For(label)){
             Object source = evt.getSource();
             if (source instanceof AbstractButton){
                 return ((ImageIcon)((AbstractButton)source).getIcon()).getDescription();
