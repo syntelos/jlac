@@ -484,9 +484,9 @@ public class FpgaDeviceController
                 int m = 0;
                 int v = 0;
                 for (int i = 0; i < 32; i++) {
-                    if (triggerMask[stage][i].isSelected())
+                    if (triggerMask[stage][31 - i].isSelected())
                         m |= 1 << i;
-                    if (triggerValue[stage][i].isSelected())
+                    if (triggerValue[stage][31 - i].isSelected())
                         v |= 1 << i;				
                 }
                 int level = triggerLevel[stage].getSelectedIndex();
